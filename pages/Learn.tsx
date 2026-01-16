@@ -11,8 +11,6 @@ interface LearnProps {
 
 const Learn: React.FC<LearnProps> = ({ onBack, coins, appSettings }) => {
     // State to track which coins are revealed (by value)
-    // Default: Show all (as per typical initial state, or hidden if preferred. Let's default to revealed but allow hiding)
-    // Re-reading user request: "Must have hide function".
     const [revealedCoins, setRevealedCoins] = useState<number[]>(coins.map(c => c.value));
     
     const showAll = () => {
@@ -25,13 +23,19 @@ const Learn: React.FC<LearnProps> = ({ onBack, coins, appSettings }) => {
         speak("全部蓋起來");
     };
 
+    const playCoinAudio = (coin: CoinType) => {
+        if (coin.customIntro && coin.customIntro.trim() !== '') {
+            speak(coin.customIntro);
+        } else {
+            let text = appSettings.voice.learn_intro;
+            text = text.replace('{label}', coin.label).replace('{color}', coin.colorDescription);
+            speak(text);
+        }
+    };
+
     const handleCoinReveal = (coin: CoinType) => {
         setRevealedCoins(prev => [...prev, coin.value]);
-        
-        // Speak intro
-        let text = appSettings.voice.learn_intro;
-        text = text.replace('{label}', coin.label).replace('{color}', coin.colorDescription);
-        speak(text);
+        playCoinAudio(coin);
     };
 
     const handleCoinHide = (e: React.MouseEvent, coinValue: number) => {
@@ -41,9 +45,7 @@ const Learn: React.FC<LearnProps> = ({ onBack, coins, appSettings }) => {
 
     const handlePlaySound = (e: React.MouseEvent, coin: CoinType) => {
         e.stopPropagation();
-        let text = appSettings.voice.learn_intro;
-        text = text.replace('{label}', coin.label).replace('{color}', coin.colorDescription);
-        speak(text);
+        playCoinAudio(coin);
     };
 
     return (

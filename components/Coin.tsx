@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { CoinType } from '../types';
 
 interface CoinProps {
@@ -10,7 +10,16 @@ interface CoinProps {
 }
 
 const Coin: React.FC<CoinProps> = ({ data, onClick, size = 'md', className = '', disableAnimation = false }) => {
+    const [imgError, setImgError] = useState(false);
     const isBill = data.type === 'bill';
+
+    // Priority: Custom Image -> Default Image
+    const displayImage = data.customImage || data.imageUrl;
+
+    // Reset error state when image source changes
+    useEffect(() => {
+        setImgError(false);
+    }, [displayImage]);
 
     let sizeClasses = '';
     if (isBill) {
@@ -33,8 +42,8 @@ const Coin: React.FC<CoinProps> = ({ data, onClick, size = 'md', className = '',
     // Fallback gradient class based on value
     const gradientClass = `coin-${data.value}`;
     
-    // Priority: Custom Image -> Default Image -> Gradient Fallback
-    const displayImage = data.customImage || data.imageUrl;
+    // Show text only if there is no image or the image failed to load
+    const showText = !displayImage || imgError;
 
     return (
         <div 
@@ -44,19 +53,19 @@ const Coin: React.FC<CoinProps> = ({ data, onClick, size = 'md', className = '',
             aria-label={data.label}
         >
             {/* Fallback Text if image fails or while loading */}
-            <span className="absolute z-10 drop-shadow-md text-slate-800 bg-white/50 px-1 rounded">
-                {data.value}
-            </span>
+            {showText && (
+                <span className="absolute z-10 drop-shadow-md text-slate-800 bg-white/50 px-1 rounded pointer-events-none">
+                    {data.value}
+                </span>
+            )}
 
             {/* Image Layer */}
-            {displayImage && (
+            {displayImage && !imgError && (
                 <img 
                     src={displayImage} 
                     alt={data.label}
-                    className={`absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-multiply ${isBill ? 'rounded-md' : 'rounded-full'}`}
-                    onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                    }}
+                    className={`absolute inset-0 w-full h-full object-cover ${isBill ? 'rounded-md' : 'rounded-full'}`}
+                    onError={() => setImgError(true)}
                 />
             )}
         </div>

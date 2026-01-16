@@ -7,6 +7,7 @@ export interface CoinType {
     colorDescription: string;
     imageUrl?: string; // Optional Wikimedia URL
     customImage?: string; // User uploaded Base64
+    customIntro?: string; // Customized voice intro text for this specific coin
 }
 
 export interface Product {

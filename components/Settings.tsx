@@ -106,15 +106,22 @@ const Settings: React.FC<SettingsProps> = ({
         }
     };
 
+    const handleCoinIntroChange = (value: string, coinValue: number) => {
+        const updatedCoins = coins.map(c => 
+            c.value === coinValue ? { ...c, customIntro: value } : c
+        );
+        onUpdateCoins(updatedCoins);
+    };
+
     const handleResetCoin = (coinValue: number) => {
         const updatedCoins = coins.map(c => 
-            c.value === coinValue ? { ...c, customImage: undefined } : c
+            c.value === coinValue ? { ...c, customImage: undefined, customIntro: undefined } : c
         );
         onUpdateCoins(updatedCoins);
     };
 
     const handleResetAllCoins = () => {
-         const updatedCoins = coins.map(c => ({ ...c, customImage: undefined }));
+         const updatedCoins = coins.map(c => ({ ...c, customImage: undefined, customIntro: undefined }));
          onUpdateCoins(updatedCoins);
     };
 
@@ -328,7 +335,7 @@ const Settings: React.FC<SettingsProps> = ({
                             <div className="flex justify-between items-center bg-blue-50 p-4 rounded-lg border border-blue-200">
                                 <div className="text-sm text-blue-800">
                                     <i className="fas fa-info-circle mr-2"></i>
-                                    您可以上傳真實的錢幣/紙鈔照片來取代預設圖片。
+                                    您可以上傳真實的錢幣/紙鈔照片來取代預設圖片，或設定專屬的介紹語音。
                                 </div>
                                 <button 
                                     onClick={handleResetAllCoins}
@@ -340,34 +347,58 @@ const Settings: React.FC<SettingsProps> = ({
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {coins.map(coin => (
-                                    <div key={coin.value} className="bg-white p-4 rounded-xl border shadow-sm flex items-center space-x-4">
-                                        <div className="flex-shrink-0">
-                                            <Coin data={coin} size="md" disableAnimation />
+                                    <div key={coin.value} className="bg-white p-4 rounded-xl border shadow-sm flex flex-col space-y-3">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="flex-shrink-0">
+                                                <Coin data={coin} size="md" disableAnimation />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-bold text-slate-800">{coin.label}</h4>
+                                                <p className="text-xs text-slate-500 mb-2">
+                                                    {coin.customImage ? '使用自訂圖片' : '使用預設圖片'}
+                                                </p>
+                                                <div className="flex gap-2">
+                                                    <label className="flex-1 cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm py-2 px-3 rounded-lg text-center transition-colors">
+                                                        <span>更換圖片</span>
+                                                        <input 
+                                                            type="file" 
+                                                            className="hidden" 
+                                                            accept="image/*"
+                                                            onChange={(e) => handleCoinFileChange(e, coin.value)}
+                                                        />
+                                                    </label>
+                                                    {(coin.customImage || coin.customIntro) && (
+                                                        <button 
+                                                            onClick={() => handleResetCoin(coin.value)}
+                                                            className="px-3 py-2 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-lg"
+                                                            title="還原此項目預設"
+                                                        >
+                                                            <i className="fas fa-undo"></i>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-bold text-slate-800">{coin.label}</h4>
-                                            <p className="text-xs text-slate-500 mb-2">
-                                                {coin.customImage ? '使用自訂圖片' : '使用預設圖片'}
-                                            </p>
+                                        <div className="pt-2 border-t mt-2">
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">個別語音介紹 (認識錢幣模式)</label>
                                             <div className="flex gap-2">
-                                                <label className="flex-1 cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm py-2 px-3 rounded-lg text-center transition-colors">
-                                                    <span>更換圖片</span>
-                                                    <input 
-                                                        type="file" 
-                                                        className="hidden" 
-                                                        accept="image/*"
-                                                        onChange={(e) => handleCoinFileChange(e, coin.value)}
-                                                    />
-                                                </label>
-                                                {coin.customImage && (
-                                                    <button 
-                                                        onClick={() => handleResetCoin(coin.value)}
-                                                        className="px-3 py-2 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-lg"
-                                                        title="還原預設"
-                                                    >
-                                                        <i className="fas fa-undo"></i>
-                                                    </button>
-                                                )}
+                                                <textarea 
+                                                    className="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                                    placeholder={`預設: 這是${coin.label}... (留空則使用預設樣板)`}
+                                                    rows={2}
+                                                    value={coin.customIntro || ''}
+                                                    onChange={(e) => handleCoinIntroChange(e.target.value, coin.value)}
+                                                />
+                                                <button 
+                                                    onClick={() => {
+                                                        const text = coin.customIntro || appSettings.voice.learn_intro.replace('{label}', coin.label).replace('{color}', coin.colorDescription);
+                                                        speak(text);
+                                                    }}
+                                                    className="px-3 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-lg"
+                                                    title="試聽"
+                                                >
+                                                    <i className="fas fa-volume-up"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
