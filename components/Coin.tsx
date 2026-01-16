@@ -32,6 +32,16 @@ const Coin: React.FC<CoinProps> = ({ data, onClick, size = 'md', className = '',
         if (size === 'lg') sizeClasses = 'w-24 h-24 text-xl';
     }
 
+    // Determine background: 
+    // If we have a valid image showing, make background transparent to avoid color bleeding.
+    // Otherwise, use the fallback metallic gradients.
+    const hasValidImage = displayImage && !imgError;
+    const gradientClass = `coin-${data.value}`;
+    
+    const backgroundClass = hasValidImage 
+        ? 'bg-transparent' 
+        : (isBill ? 'bg-slate-100' : gradientClass);
+
     // Base styles
     const baseStyle = `relative flex items-center justify-center font-bold shadow-md cursor-pointer select-none 
         ${isBill ? 'rounded-md border-2 border-slate-300' : 'rounded-full border-2 border-yellow-700/20'}
@@ -39,28 +49,22 @@ const Coin: React.FC<CoinProps> = ({ data, onClick, size = 'md', className = '',
         ${className} ${sizeClasses}
     `;
 
-    // Fallback gradient class based on value
-    const gradientClass = `coin-${data.value}`;
-    
-    // Show text only if there is no image or the image failed to load
-    const showText = !displayImage || imgError;
-
     return (
         <div 
-            className={`${baseStyle} ${isBill ? 'bg-slate-100' : gradientClass}`} 
+            className={`${baseStyle} ${backgroundClass}`} 
             onClick={onClick}
             role="button"
             aria-label={data.label}
         >
-            {/* Fallback Text if image fails or while loading */}
-            {showText && (
+            {/* Fallback Text: Only show if NO image is available */}
+            {!hasValidImage && (
                 <span className="absolute z-10 drop-shadow-md text-slate-800 bg-white/50 px-1 rounded pointer-events-none">
                     {data.value}
                 </span>
             )}
 
             {/* Image Layer */}
-            {displayImage && !imgError && (
+            {hasValidImage && (
                 <img 
                     src={displayImage} 
                     alt={data.label}
