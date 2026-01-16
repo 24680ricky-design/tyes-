@@ -18,7 +18,12 @@ const App: React.FC = () => {
         // Products
         const savedProducts = localStorage.getItem('tyes_products');
         if (savedProducts) {
-            setProducts(JSON.parse(savedProducts));
+            try {
+                setProducts(JSON.parse(savedProducts) as Product[]);
+            } catch (e) {
+                console.error("Failed to parse products", e);
+                setProducts(DEFAULT_PRODUCTS);
+            }
         } else {
             setProducts(DEFAULT_PRODUCTS);
         }
@@ -26,7 +31,12 @@ const App: React.FC = () => {
         // Coins
         const savedCoins = localStorage.getItem('tyes_coins');
         if (savedCoins) {
-            setCoins(JSON.parse(savedCoins));
+            try {
+                setCoins(JSON.parse(savedCoins) as CoinType[]);
+            } catch (e) {
+                console.error("Failed to parse coins", e);
+                setCoins(DEFAULT_COINS);
+            }
         } else {
             setCoins(DEFAULT_COINS);
         }
@@ -34,12 +44,17 @@ const App: React.FC = () => {
         // Settings
         const savedSettings = localStorage.getItem('tyes_settings');
         if (savedSettings) {
-            const parsed = JSON.parse(savedSettings);
-            // Merge with default voice settings if missing (for migration)
-            if (!parsed.voice) {
-                parsed.voice = DEFAULT_SETTINGS.voice;
+            try {
+                const parsed = JSON.parse(savedSettings) as AppSettings;
+                // Merge with default voice settings if missing (for migration)
+                if (!parsed.voice) {
+                    parsed.voice = DEFAULT_SETTINGS.voice;
+                }
+                setAppSettings(parsed);
+            } catch (e) {
+                console.error("Failed to parse settings", e);
+                setAppSettings(DEFAULT_SETTINGS);
             }
-            setAppSettings(parsed);
         } else {
             setAppSettings(DEFAULT_SETTINGS);
         }
