@@ -16,9 +16,7 @@ const Home: React.FC<HomeProps> = ({ onChangeView, appSettings }) => {
     };
 
     return (
-        /* Outer container: Handles scrolling independently */
         <div className="w-full h-full overflow-y-auto overflow-x-hidden">
-            /* Inner container: Handles layout, centering, and animation */
             <div className="w-full max-w-4xl mx-auto p-6 space-y-8 animate-fade-in pb-20">
                 {/* Hero Section */}
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-blue-500 to-teal-400">
