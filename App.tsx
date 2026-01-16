@@ -13,46 +13,36 @@ const App: React.FC = () => {
     const [appSettings, setAppSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
     const [showSettings, setShowSettings] = useState(false);
 
-    // Load data from local storage on mount
     useEffect(() => {
-        // Products
         const savedProducts = localStorage.getItem('tyes_products');
         if (savedProducts) {
             try {
                 setProducts(JSON.parse(savedProducts) as Product[]);
             } catch (e) {
-                console.error("Failed to parse products", e);
                 setProducts(DEFAULT_PRODUCTS);
             }
         } else {
             setProducts(DEFAULT_PRODUCTS);
         }
 
-        // Coins
         const savedCoins = localStorage.getItem('tyes_coins');
         if (savedCoins) {
             try {
                 setCoins(JSON.parse(savedCoins) as CoinType[]);
             } catch (e) {
-                console.error("Failed to parse coins", e);
                 setCoins(DEFAULT_COINS);
             }
         } else {
             setCoins(DEFAULT_COINS);
         }
 
-        // Settings
         const savedSettings = localStorage.getItem('tyes_settings');
         if (savedSettings) {
             try {
                 const parsed = JSON.parse(savedSettings) as AppSettings;
-                // Merge with default voice settings if missing (for migration)
-                if (!parsed.voice) {
-                    parsed.voice = DEFAULT_SETTINGS.voice;
-                }
+                if (!parsed.voice) parsed.voice = DEFAULT_SETTINGS.voice;
                 setAppSettings(parsed);
             } catch (e) {
-                console.error("Failed to parse settings", e);
                 setAppSettings(DEFAULT_SETTINGS);
             }
         } else {
@@ -60,32 +50,27 @@ const App: React.FC = () => {
         }
     }, []);
 
-    // Save products when updated
     const handleUpdateProducts = (newProducts: Product[]) => {
         setProducts(newProducts);
         localStorage.setItem('tyes_products', JSON.stringify(newProducts));
     };
 
-    // Save coins when updated
     const handleUpdateCoins = (newCoins: CoinType[]) => {
         setCoins(newCoins);
         localStorage.setItem('tyes_coins', JSON.stringify(newCoins));
     };
 
-    // Save settings when updated
     const handleUpdateAppSettings = (newSettings: AppSettings) => {
         setAppSettings(newSettings);
         localStorage.setItem('tyes_settings', JSON.stringify(newSettings));
     };
 
     return (
-        <div className="min-h-screen bg-blue-50 relative">
-            {/* Global Settings Button (Top Right) - Only visible on Home */}
+        <div className="flex flex-col min-h-screen w-full bg-blue-50 relative overflow-hidden">
             {currentView === 'HOME' && (
                 <button 
                     onClick={() => setShowSettings(true)}
                     className="fixed top-4 right-4 z-50 bg-white/80 backdrop-blur p-3 rounded-full shadow-lg text-slate-400 hover:text-blue-600 transition-colors"
-                    title="教學後台管理"
                 >
                     <i className="fas fa-cog text-xl"></i>
                 </button>
@@ -103,10 +88,12 @@ const App: React.FC = () => {
                 />
             )}
 
-            {currentView === 'HOME' && <Home onChangeView={setCurrentView} appSettings={appSettings} />}
-            {currentView === 'LEARN' && <Learn onBack={() => setCurrentView('HOME')} coins={coins} appSettings={appSettings} />}
-            {currentView === 'FIND' && <Find onBack={() => setCurrentView('HOME')} coins={coins} appSettings={appSettings} />}
-            {currentView === 'SHOP' && <Shop onBack={() => setCurrentView('HOME')} products={products} coins={coins} appSettings={appSettings} />}
+            <main className="flex-1 w-full h-full">
+                {currentView === 'HOME' && <Home onChangeView={setCurrentView} appSettings={appSettings} />}
+                {currentView === 'LEARN' && <Learn onBack={() => setCurrentView('HOME')} coins={coins} appSettings={appSettings} />}
+                {currentView === 'FIND' && <Find onBack={() => setCurrentView('HOME')} coins={coins} appSettings={appSettings} />}
+                {currentView === 'SHOP' && <Shop onBack={() => setCurrentView('HOME')} products={products} coins={coins} appSettings={appSettings} />}
+            </main>
         </div>
     );
 };
