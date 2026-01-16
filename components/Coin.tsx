@@ -3,7 +3,7 @@ import { CoinType } from '../types';
 
 interface CoinProps {
     data: CoinType;
-    onClick?: () => void;
+    onClick?: React.MouseEventHandler<HTMLDivElement>;
     size?: 'sm' | 'md' | 'lg';
     className?: string;
     disableAnimation?: boolean;

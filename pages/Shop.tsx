@@ -485,7 +485,7 @@ const Shop: React.FC<ShopProps> = ({ onBack, products, coins, appSettings }) => 
                             <div key={coin.value} id={`wallet-coin-${coin.value}`} className="flex flex-col items-center">
                                 <Coin 
                                     data={coin} 
-                                    onClick={(e) => handleWalletClick(coin, e as any)}
+                                    onClick={(e) => handleWalletClick(coin, e)}
                                     className={`mb-2 ${isAnimating ? 'cursor-not-allowed opacity-50' : ''}`}
                                     size="md"
                                 />
