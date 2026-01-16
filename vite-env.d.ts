@@ -1,3 +1,6 @@
+
+/* Removed failing reference to vite/client to resolve TS2688 error */
+
 declare module '*.svg' {
   const content: string;
   export default content;

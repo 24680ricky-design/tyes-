@@ -1,7 +1,10 @@
+
 import React, { useState, useRef } from 'react';
 import { Product, CoinType, AppSettings, DEFAULT_VOICE_SETTINGS } from '../types';
 import Coin from './Coin';
 import { speak } from '../utils/tts';
+// Import GoogleGenAI for AI-powered content generation
+import { GoogleGenAI } from "@google/genai";
 
 interface SettingsProps {
     onClose: () => void;
@@ -22,12 +25,38 @@ const Settings: React.FC<SettingsProps> = ({
     appSettings, onUpdateAppSettings 
 }) => {
     const [activeTab, setActiveTab] = useState<Tab>('GENERAL');
+    const [isGenerating, setIsGenerating] = useState(false);
     
     // Product State
     const [newItemName, setNewItemName] = useState('');
     const [newItemPrice, setNewItemPrice] = useState<number | ''>('');
     const [newItemImage, setNewItemImage] = useState<string | null>(null);
     const productFileInputRef = useRef<HTMLInputElement>(null);
+
+    // --- AI Suggestions Handler using Gemini ---
+    const handleGenerateAISuggestions = async () => {
+        setIsGenerating(true);
+        try {
+            // Use Gemini 3 Pro for high-quality pedagogical reasoning
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const response = await ai.models.generateContent({
+                model: 'gemini-3-pro-preview',
+                contents: "你是一位資深的特教老師。請針對「台幣錢幣教學（1元, 5元, 10元, 50元, 100元, 500元, 1000元）」提供教學重點建議。請以 HTML 格式輸出，使用 <ul> 和 <li> 標籤，並包含 <strong> 強調重點。內容要實用、具備教育意義且適合特教學生。字數約 200-300 字。",
+            });
+            
+            if (response.text) {
+                // Remove potential markdown code block artifacts
+                const cleanedHtml = response.text.replace(/```html|```/g, '').trim();
+                handleSettingChange('teacherInfoContent', cleanedHtml);
+                speak("教學重點已透過 AI 生成完畢");
+            }
+        } catch (error) {
+            console.error("Gemini AI Generation failed:", error);
+            alert("AI 生成失敗，請檢查 API 金鑰或網路連線。");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     // --- General Handlers ---
     const handleSettingChange = (key: keyof AppSettings, value: any) => {
@@ -180,7 +209,18 @@ const Settings: React.FC<SettingsProps> = ({
                     {activeTab === 'GENERAL' && (
                         <div className="space-y-6">
                             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                                <h3 className="text-lg font-bold text-slate-800 mb-4">介面文字設定</h3>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-bold text-slate-800">介面文字設定</h3>
+                                    <button 
+                                        onClick={handleGenerateAISuggestions}
+                                        disabled={isGenerating}
+                                        className={`flex items-center px-4 py-2 rounded-lg text-sm font-bold text-white transition-all
+                                            ${isGenerating ? 'bg-gray-400' : 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 active:scale-95 shadow-md'}`}
+                                    >
+                                        <i className={`fas fa-magic mr-2 ${isGenerating ? 'animate-spin' : ''}`}></i>
+                                        {isGenerating ? 'AI 生成中...' : 'AI 輔助生成教學重點'}
+                                    </button>
+                                </div>
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">頁尾版權文字 (Footer)</label>

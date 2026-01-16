@@ -66,7 +66,7 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen w-full bg-blue-50 relative overflow-hidden">
+        <div className="flex flex-col h-screen w-full bg-blue-50 relative overflow-hidden">
             {currentView === 'HOME' && (
                 <button 
                     onClick={() => setShowSettings(true)}
@@ -88,7 +88,7 @@ const App: React.FC = () => {
                 />
             )}
 
-            <main className="flex-1 w-full h-full">
+            <main className="flex-1 w-full relative h-full">
                 {currentView === 'HOME' && <Home onChangeView={setCurrentView} appSettings={appSettings} />}
                 {currentView === 'LEARN' && <Learn onBack={() => setCurrentView('HOME')} coins={coins} appSettings={appSettings} />}
                 {currentView === 'FIND' && <Find onBack={() => setCurrentView('HOME')} coins={coins} appSettings={appSettings} />}
